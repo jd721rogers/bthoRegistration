@@ -59,5 +59,5 @@ with open("grd20131AG.csv") as csvfile:
       Fs.append(F)
       Qs.append(Q)
       instructors.append(instr)
-   print(Fs)
+#   print(Fs)
       
