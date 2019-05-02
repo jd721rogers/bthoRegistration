@@ -28,6 +28,7 @@ with open("grd20131AG.csv") as csvfile:
    Qs = []
    instructors = []
    readGrades = csv.reader(csvfile, delimiter=",")
+   readGrades.row[0]
    # iterate through row to grab useful data from .csv
    for row in readGrades:
       crs = row[0]
