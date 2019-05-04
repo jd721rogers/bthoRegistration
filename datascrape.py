@@ -3,6 +3,7 @@ Created on Mon Apr 29 10:24:30 2019
 Version 1.0
 
 @author: Jonathan Rogers
+         Nicholas Minton
 """
 
 
