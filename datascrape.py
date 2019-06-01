@@ -26,7 +26,7 @@ def mid(s, offset, amount):
 
 # function for detecting numbers in string
 def hasNumbers(inputString):
-   isItNum = any(char.isdigit() for char in inputString)
+   return any(char.isdigit() for char in inputString)
 
 # downloads grade reports from TAMU registrar website
 def download_file(download_url,pdf_ref,working_pdfs):
@@ -188,7 +188,7 @@ class Grade:
 # initialize variables
 year = 2010
 today = datetime.today() # current date
-n = 2013
+n = today.year
 semester = 1 # Spring = 1, Summer = 2, Fall = 3
 college = 0
 colleges = ['AE','AG','AR','AP','GB','BA','DN','DN_PROF','ED','EN','GV','GE','SL','LA',\
@@ -235,7 +235,7 @@ if today.month == ("July" or "August" or "September"):
       if year == today.year:
          semester = 1
          while college < len(colleges):
-            if (str(year) + str(semester) + str(colleges[college])) == ("20112MS" or "20122MS" or "20132MS" or "20142MS" or "20152MS"):
+            if (((str(year) + str(semester) + str(colleges[college])) == "20112MS") or ((str(year) + str(semester) + str(colleges[college])) == "20122MS") or ((str(year) + str(semester) + str(colleges[college])) == "20132MS") or ((str(year) + str(semester) + str(colleges[college])) == "20142MS") or ((str(year) + str(semester) + str(colleges[college])) == "20152MS") or ((str(year) + str(semester) + str(colleges[college])) == "20162MD")):
                pass
             else:
                download_url = "http://web-as.tamu.edu/gradereport/PDFReports/" + str(year) + str(semester)\
@@ -250,7 +250,7 @@ if today.month == ("July" or "August" or "September"):
       else:
          while semester <= 3:
             while college < len(colleges):
-               if (str(year) + str(semester) + str(colleges[college])) == ("20112MS" or "20122MS" or "20132MS" or "20142MS" or "20152MS"):
+               if (((str(year) + str(semester) + str(colleges[college])) == "20112MS") or ((str(year) + str(semester) + str(colleges[college])) == "20122MS") or ((str(year) + str(semester) + str(colleges[college])) == "20132MS") or ((str(year) + str(semester) + str(colleges[college])) == "20142MS") or ((str(year) + str(semester) + str(colleges[college])) == "20152MS") or ((str(year) + str(semester) + str(colleges[college])) == "20162MD")):
                   pass
                else:
                   download_url = "http://web-as.tamu.edu/gradereport/PDFReports/" + str(year) + str(semester)\
@@ -272,7 +272,7 @@ elif today.month == ("September" or "October" or "November" or "December"):
          semester = 1
          while semester <= 2:
             while college < len(colleges):
-               if (str(year) + str(semester) + str(colleges[college])) == ("20112MS" or "20122MS" or "20132MS" or "20142MS" or "20152MS"):
+               if (((str(year) + str(semester) + str(colleges[college])) == "20112MS") or ((str(year) + str(semester) + str(colleges[college])) == "20122MS") or ((str(year) + str(semester) + str(colleges[college])) == "20132MS") or ((str(year) + str(semester) + str(colleges[college])) == "20142MS") or ((str(year) + str(semester) + str(colleges[college])) == "20152MS") or ((str(year) + str(semester) + str(colleges[college])) == "20162MD")):
                   pass
                else:
                   download_url = "http://web-as.tamu.edu/gradereport/PDFReports/" + str(year) + str(semester)\
@@ -288,7 +288,7 @@ elif today.month == ("September" or "October" or "November" or "December"):
       else:
          while semester <= 3:
             while college < len(colleges):
-               if (str(year) + str(semester) + str(colleges[college])) == ("20112MS" or "20122MS" or "20132MS" or "20142MS" or "20152MS"):
+               if (((str(year) + str(semester) + str(colleges[college])) == "20112MS") or ((str(year) + str(semester) + str(colleges[college])) == "20122MS") or ((str(year) + str(semester) + str(colleges[college])) == "20132MS") or ((str(year) + str(semester) + str(colleges[college])) == "20142MS") or ((str(year) + str(semester) + str(colleges[college])) == "20152MS") or ((str(year) + str(semester) + str(colleges[college])) == "20162MD")):
                   pass
                else:
                   download_url = "http://web-as.tamu.edu/gradereport/PDFReports/" + str(year) + str(semester)\
@@ -308,7 +308,7 @@ else:
    while year < n:
       while semester <= 3:
          while college < len(colleges):
-            if (str(year) + str(semester) + str(colleges[college])) == ("20112MS" or "20122MS" or "20132MS" or "20142MS" or "20152MS"):
+            if (((str(year) + str(semester) + str(colleges[college])) == "20112MS") or ((str(year) + str(semester) + str(colleges[college])) == "20122MS") or ((str(year) + str(semester) + str(colleges[college])) == "20132MS") or ((str(year) + str(semester) + str(colleges[college])) == "20142MS") or ((str(year) + str(semester) + str(colleges[college])) == "20152MS") or ((str(year) + str(semester) + str(colleges[college])) == "20162MD")):
                pass
             else:
                download_url = "http://web-as.tamu.edu/gradereport/PDFReports/" + str(year) + str(semester)\
