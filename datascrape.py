@@ -3,6 +3,7 @@ Created on Mon Apr 29 10:24:30 2019
 Version 1.0
 
 @author: Jonathan Rogers
+
 """
 import pandas as pd
 import csv
@@ -56,7 +57,6 @@ def getGrades(url,yr,sem,col):
    all_csvs = [j for j in glob.glob('*.{}'.format('csv'))]
    num_csvs = len(os.listdir(r"C:\Users\jd721\bthoRegistration\tabula"))
    # read all csv files into one dataframe
-   # try:
    grades_csv = pd.concat([pd.read_csv(f) for f in all_csvs], sort=False)
    # convert combined dataframe into a csv
    grades_csv.to_csv( "grades_csv.csv", index = False, encoding = 'utf-8-sig')
@@ -73,14 +73,22 @@ def getGrades(url,yr,sem,col):
       # read csv file
       readGrades = csv.reader(csvfile, delimiter=",")
       # iterate through row to grab useful data from .csv
-      # try:
       for row in readGrades:
          if (row[0] != "COURSE TOTAL:") & (row[0] != "DEPARTMENT TOTAL:") & (len(row[0]) > 6):
+            void = "OK"
+            if str(col) == "CP_PROF":
+               crs = left(row[0],4) + mid(row[0],5,3)
+               A = str(row[1])
+               B = str(row[2])
+               C = str(row[3])
+               D = str(row[4])
+               F = str(row[5])
+               Q = "N/A"
+               instr = row[13]
             # these if statements SHOULD account for an error in converting the .pdf to
             # a .csv file. Tabula is kinda wack. Maybe something that could be fixed.
             # Lol jk we'll wing it.
-            if len(row) == 13:
-               void = "OK"
+            elif len(row) == 13:
                crs = left(row[0],4) + mid(row[0],5,3)
                A = str(row[1])
                B = str(row[2])
@@ -125,7 +133,7 @@ def getGrades(url,yr,sem,col):
                Q = str(row[11])
                instr = row[14]
             else:
-               raise Exception('Need to account for a new version of csv format. Sry, I know it sucks to see this. ;(')
+               raise Exception('Need to account for a new version of csv format. ;(')
             # accounting for another weird tabula thing
             if F == "":
                if len(D) == 4:
@@ -143,21 +151,8 @@ def getGrades(url,yr,sem,col):
                temp = Grade(instr,crs,A,B,C,D,F,Q)
                c.execute("INSERT INTO grades VALUES (?, ?, ?, ?, ?, ?, ?, ?)", (temp.instructor, temp.clas, temp.numAs, temp.numBs, temp.numCs, temp.numDs, temp.numFs, temp.numQs))
                db.commit()
-         # except:
-         #    pass
-   # except:
-   #    filelist = glob.glob(os.path.join(r"C:\Users\jd721\bthoRegistration\tabula", "*.csv"))
-   #    for f in filelist:
-   #       os.remove(f)
 
 # initialize database
-# checks to see if there is already a database file
-exists = os.path.isfile(r"C:\Users\jd721\bthoRegistration\grades.db")
-if exists:
-    # deletes old database file
-    os.remove(r"C:\Users\jd721\bthoRegistration\grades.db")
-else:
-    pass
 db = sqlite3.connect('grades.db')
 c = db.cursor()
 c.execute("""CREATE TABLE grades (
@@ -191,139 +186,109 @@ today = datetime.today() # current date
 n = today.year
 semester = 1 # Spring = 1, Summer = 2, Fall = 3
 college = 0
-colleges = ['AE','AG','AR','AP','GB','BA','DN','DN_PROF','ED','EN','GV','GE','SL','LA',\
-            'MD','MD_PROF','MS','NU','CP_PROF','PH','QT','SC','VM','VM_PROF']
+colleges = ['AE','AG','AR','AP','GB','BA','DN','ED','EN','GV','GE','SL','LA',\
+            'MD','MS','NU','CP_PROF','PH','QT','SC','VM','VM_PROF']
+pdf_ref = 0
 
 # array for referencing whether there is an available pdf from previous years/semesters/colleges
 # each row is a semester&year combination and each number slot represents a college for that combination
-working_pdfs = [0, 1, 1, 0, 1, 1, 0, 0, 1, 1, 1, 1, 0, 1, 0, 0, 1, 0, 0, 0, 1, 1, 1, 0, \
-                0, 1, 1, 0, 1, 1, 0, 0, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, \
-                0, 1, 1, 0, 1, 1, 0, 0, 1, 1, 1, 1, 0, 1, 0, 0, 1, 0, 0, 0, 1, 1, 1, 0, \
-                0, 1, 1, 0, 1, 1, 0, 0, 1, 1, 1, 1, 0, 1, 0, 0, 1, 0, 0, 0, 1, 1, 1, 0, \
-                0, 1, 1, 0, 1, 1, 0, 0, 1, 1, 1, 1, 0, 1, 0, 0, 1, 0, 0, 0, 1, 1, 1, 0, \
-                0, 1, 1, 0, 1, 1, 0, 0, 1, 1, 1, 1, 0, 1, 0, 0, 1, 0, 0, 0, 1, 1, 1, 0, \
-                0, 1, 1, 0, 1, 1, 0, 0, 1, 1, 1, 1, 0, 1, 0, 0, 1, 0, 0, 0, 1, 1, 1, 0, \
-                0, 1, 1, 0, 1, 1, 0, 0, 1, 1, 1, 1, 0, 1, 0, 0, 1, 0, 0, 0, 1, 1, 1, 0, \
-                0, 1, 1, 0, 1, 1, 0, 0, 1, 1, 1, 1, 0, 1, 0, 0, 1, 0, 0, 0, 1, 1, 1, 0, \
-                0, 1, 1, 0, 1, 1, 0, 0, 1, 1, 1, 1, 0, 1, 0, 0, 1, 0, 0, 0, 1, 1, 1, 0, \
-                0, 1, 1, 0, 1, 1, 0, 0, 1, 1, 1, 1, 0, 1, 0, 0, 1, 0, 0, 0, 1, 1, 1, 0, \
-                0, 1, 1, 0, 1, 1, 0, 0, 1, 1, 1, 1, 0, 1, 0, 0, 1, 0, 0, 0, 1, 1, 1, 0, \
-                0, 1, 1, 0, 1, 1, 0, 0, 1, 1, 1, 1, 0, 1, 0, 0, 1, 0, 0, 0, 1, 1, 1, 0, \
-                0, 1, 1, 0, 1, 1, 0, 0, 1, 1, 1, 1, 0, 1, 0, 0, 1, 0, 0, 0, 1, 1, 1, 0, \
-                0, 1, 1, 0, 1, 1, 0, 0, 1, 1, 1, 1, 0, 1, 0, 0, 1, 0, 0, 0, 1, 1, 1, 0, \
-                0, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, \
-                0, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, \
-                0, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, \
-                0, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, \
-                0, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, \
-                1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, \
-                1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, \
-                0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, \
-                1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, \
-                1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, \
-                1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, \
-                1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-pdf_ref = 0
+working_pdfs = [0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 1, 0, 1, 0, 0, 0, 1, 1, 1, 0, \
+                0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 1, 1, 1, 0, \
+                0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 1, 0, 1, 0, 0, 0, 1, 1, 1, 0, \
+                0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 1, 0, 1, 0, 0, 0, 1, 1, 1, 0, \
+                0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 1, 0, 1, 0, 0, 0, 1, 1, 1, 0, \
+                0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 1, 0, 1, 0, 0, 0, 1, 1, 1, 0, \
+                0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 1, 0, 1, 0, 0, 0, 1, 1, 1, 0, \
+                0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 1, 0, 1, 0, 0, 0, 1, 1, 1, 0, \
+                0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 1, 0, 1, 0, 0, 0, 1, 1, 1, 0, \
+                0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 1, 0, 1, 0, 0, 0, 1, 1, 1, 0, \
+                0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 1, 0, 1, 0, 0, 0, 1, 1, 1, 0, \
+                0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 1, 0, 1, 0, 0, 0, 1, 1, 1, 0, \
+                0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 1, 0, 1, 0, 0, 0, 1, 1, 1, 0, \
+                0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 1, 0, 1, 0, 0, 0, 1, 1, 1, 0, \
+                0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 1, 0, 1, 0, 0, 0, 1, 1, 1, 0, \
+                0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, \
+                0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, \
+                0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, \
+                0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, \
+                0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, \
+                1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, \
+                1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, \
+                0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, \
+                1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, \
+                1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, \
+                1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, \
+                1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
 
-# loops through every college for every semester and every year and downloads available grade reports\
-# and parses through grade reports to obtain grade data
-# checks for current time of year to see last probable grade report available
+# loops through every college for every semester and every year and downloads available grade reports
+# Also parses through grade reports to obtain grade data
 #
-# current year spring reports available
-if today.month == ("July" or "August" or "September"):
-   while year <= n:
-      if year == today.year:
-         semester = 1
-         while college < len(colleges):
-            if (((str(year) + str(semester) + str(colleges[college])) == "20112MS") or ((str(year) + str(semester) + str(colleges[college])) == "20122MS") or ((str(year) + str(semester) + str(colleges[college])) == "20132MS") or ((str(year) + str(semester) + str(colleges[college])) == "20142MS") or ((str(year) + str(semester) + str(colleges[college])) == "20152MS") or ((str(year) + str(semester) + str(colleges[college])) == "20162MD")):
-               pass
-            else:
-               download_url = "http://web-as.tamu.edu/gradereport/PDFReports/" + str(year) + str(semester)\
-               + "/grd" + str(year) + str(semester) + colleges[college] + ".pdf"
-               os.chdir(r"C:\Users\jd721\bthoRegistration\gradepdfs")
-               download_file(download_url,pdf_ref,working_pdfs)
-               if (working_pdfs[pdf_ref]) == 1:
-                  getGrades(download_url,year,semester,colleges[college])
-            college += 1
-            pdf_ref += 1
-         college = 0
-      else:
-         while semester <= 3:
-            while college < len(colleges):
-               if (((str(year) + str(semester) + str(colleges[college])) == "20112MS") or ((str(year) + str(semester) + str(colleges[college])) == "20122MS") or ((str(year) + str(semester) + str(colleges[college])) == "20132MS") or ((str(year) + str(semester) + str(colleges[college])) == "20142MS") or ((str(year) + str(semester) + str(colleges[college])) == "20152MS") or ((str(year) + str(semester) + str(colleges[college])) == "20162MD")):
-                  pass
-               else:
-                  download_url = "http://web-as.tamu.edu/gradereport/PDFReports/" + str(year) + str(semester)\
-                  + "/grd" + str(year) + str(semester) + colleges[college] + ".pdf"
-                  os.chdir(r"C:\Users\jd721\bthoRegistration\gradepdfs")
-                  download_file(download_url,pdf_ref,working_pdfs)
-                  if (working_pdfs[pdf_ref]) == 1:
-                     getGrades(download_url,year,semester,colleges[college])
-               college += 1
-               pdf_ref += 1
-            college = 0
-            semester += 1
-         year += 1
-         semester = 1  
-# current year spring and summer reports available
-elif today.month == ("September" or "October" or "November" or "December"):
-   while year <= n:
-      if year == today.year:
-         semester = 1
-         while semester <= 2:
-            while college < len(colleges):
-               if (((str(year) + str(semester) + str(colleges[college])) == "20112MS") or ((str(year) + str(semester) + str(colleges[college])) == "20122MS") or ((str(year) + str(semester) + str(colleges[college])) == "20132MS") or ((str(year) + str(semester) + str(colleges[college])) == "20142MS") or ((str(year) + str(semester) + str(colleges[college])) == "20152MS") or ((str(year) + str(semester) + str(colleges[college])) == "20162MD")):
-                  pass
-               else:
-                  download_url = "http://web-as.tamu.edu/gradereport/PDFReports/" + str(year) + str(semester)\
-                  + "/grd" + str(year) + str(semester) + colleges[college] + ".pdf"
-                  os.chdir(r"C:\Users\jd721\bthoRegistration\gradepdfs")
-                  download_file(download_url,pdf_ref,working_pdfs)
-                  if (working_pdfs[pdf_ref]) == 1:
-                     getGrades(download_url,year,semester,colleges[college])
-               college += 1
-               pdf_ref += 1
-            college = 0
-            semester += 1
-      else:
-         while semester <= 3:
-            while college < len(colleges):
-               if (((str(year) + str(semester) + str(colleges[college])) == "20112MS") or ((str(year) + str(semester) + str(colleges[college])) == "20122MS") or ((str(year) + str(semester) + str(colleges[college])) == "20132MS") or ((str(year) + str(semester) + str(colleges[college])) == "20142MS") or ((str(year) + str(semester) + str(colleges[college])) == "20152MS") or ((str(year) + str(semester) + str(colleges[college])) == "20162MD")):
-                  pass
-               else:
-                  download_url = "http://web-as.tamu.edu/gradereport/PDFReports/" + str(year) + str(semester)\
-                  + "/grd" + str(year) + str(semester) + colleges[college] + ".pdf"
-                  os.chdir(r"C:\Users\jd721\bthoRegistration\gradepdfs")
-                  download_file(download_url,pdf_ref,working_pdfs)
-                  if (working_pdfs[pdf_ref]) == 1:
-                     getGrades(download_url,year,semester,colleges[college])
-               college += 1
-               pdf_ref += 1
-            college = 0
-            semester += 1
-         year += 1
-         semester = 1  
-# no current year reports available
-else:
-   while year < n:
-      while semester <= 3:
-         while college < len(colleges):
-            if (((str(year) + str(semester) + str(colleges[college])) == "20112MS") or ((str(year) + str(semester) + str(colleges[college])) == "20122MS") or ((str(year) + str(semester) + str(colleges[college])) == "20132MS") or ((str(year) + str(semester) + str(colleges[college])) == "20142MS") or ((str(year) + str(semester) + str(colleges[college])) == "20152MS") or ((str(year) + str(semester) + str(colleges[college])) == "20162MD")):
-               pass
-            else:
-               download_url = "http://web-as.tamu.edu/gradereport/PDFReports/" + str(year) + str(semester)\
-               + "/grd" + str(year) + str(semester) + colleges[college] + ".pdf"
-               os.chdir(r"C:\Users\jd721\bthoRegistration\gradepdfs")
-               download_file(download_url,pdf_ref,working_pdfs)
-               if (working_pdfs[pdf_ref]) == 1:
-                  getGrades(download_url,year,semester,colleges[college])
-            college += 1
-            pdf_ref += 1
-         college = 0
-         semester += 1
-      year += 1
-      semester = 1
+# reports that only go up to previous year
+while year < n:
+   while semester <= 3:
+      while college < len(colleges):
+         # if statement accounts for broken pdfs
+         if (((str(year) + str(semester) + str(colleges[college])) == "20112MS") \
+         or ((str(year) + str(semester) + str(colleges[college])) == "20122MS") \
+         or ((str(year) + str(semester) + str(colleges[college])) == "20132MS") \
+         or ((str(year) + str(semester) + str(colleges[college])) == "20142MS") \
+         or ((str(year) + str(semester) + str(colleges[college])) == "20152MS") \
+         or ((str(year) + str(semester) + str(colleges[college])) == "20162MD") \
+         or ((str(year) + str(semester) + str(colleges[college])) == "20182AE") \
+         or ((str(year) + str(semester) + str(colleges[college])) == "20182MS")):
+            pass
+         else:
+            download_url = "http://web-as.tamu.edu/gradereport/PDFReports/" + str(year) + str(semester)\
+            + "/grd" + str(year) + str(semester) + colleges[college] + ".pdf"
+            os.chdir(r"C:\Users\jd721\bthoRegistration\gradepdfs")
+            download_file(download_url,pdf_ref,working_pdfs)
+            if (working_pdfs[pdf_ref]) == 1:
+               getGrades(download_url,year,semester,colleges[college])
+         college += 1
+         pdf_ref += 1
+      college = 0
+      semester += 1
+   year += 1
+   semester = 1
 
+# checks for current month to see last probable grade report available
+#
+# current year spring report
+if ((today.month == 6) or (today.month == 7) or (today.month == 8)):
+   semester = 1
+   college = 0
+   year = n
+   while college < len(colleges):
+      download_url = "http://web-as.tamu.edu/gradereport/PDFReports/" + str(year) + str(semester)\
+      + "/grd" + str(year) + str(semester) + colleges[college] + ".pdf"
+      os.chdir(r"C:\Users\jd721\bthoRegistration\gradepdfs")
+      download_file(download_url,pdf_ref,working_pdfs)
+      if (working_pdfs[pdf_ref]) == 1:
+         getGrades(download_url,year,semester,colleges[college])
+      college += 1
+      pdf_ref += 1
+# current year spring & summer reports
+elif ((today.month == 9) or (today.month == 10) or (today.month == 11) or (today.month == 12)):
+   semester = 1
+   college = 0
+   year = n
+   while semester < 3:
+      while college < len(colleges):
+         download_url = "http://web-as.tamu.edu/gradereport/PDFReports/" + str(year) + str(semester)\
+         + "/grd" + str(year) + str(semester) + colleges[college] + ".pdf"
+         os.chdir(r"C:\Users\jd721\bthoRegistration\gradepdfs")
+         download_file(download_url,pdf_ref,working_pdfs)
+         if (working_pdfs[pdf_ref]) == 1:
+            getGrades(download_url,year,semester,colleges[college])
+         college += 1
+         pdf_ref += 1
+      college = 0
+      semester += 1
+# no current year reports
+else:
+   pass
+
+deleting all pdfs and csvs
 filelist1 = glob.glob(os.path.join(r"C:\Users\jd721\bthoRegistration\gradepdfs", "*.pdf"))
 filelist2 = glob.glob(os.path.join(r"C:\Users\jd721\bthoRegistration\gradecsvs", "*.csv"))
 for f in filelist1:
