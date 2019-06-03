@@ -183,7 +183,8 @@ class Grade:
 # initialize variables
 year = 2010
 today = datetime.today() # current date
-n = today.year
+current_month = today.month # current month
+n = today.year # current year
 semester = 1 # Spring = 1, Summer = 2, Fall = 3
 college = 0
 colleges = ['AE','AG','AR','AP','GB','BA','DN','ED','EN','GV','GE','SL','LA',\
@@ -218,7 +219,9 @@ working_pdfs = [0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 1, 0, 1, 0, 0, 0, 1, 1, 1, 0
                 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, \
                 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, \
                 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, \
-                1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+                1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, \
+                1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 1, 0]
+
 
 # loops through every college for every semester and every year and downloads available grade reports
 # Also parses through grade reports to obtain grade data
@@ -254,7 +257,7 @@ while year < n:
 # checks for current month to see last probable grade report available
 #
 # current year spring report
-if ((today.month == 6) or (today.month == 7) or (today.month == 8)):
+if ((current_month == 6) or (current_month == 7) or (current_month == 8)):
    semester = 1
    college = 0
    year = n
@@ -268,7 +271,7 @@ if ((today.month == 6) or (today.month == 7) or (today.month == 8)):
       college += 1
       pdf_ref += 1
 # current year spring & summer reports
-elif ((today.month == 9) or (today.month == 10) or (today.month == 11) or (today.month == 12)):
+elif ((current_month == 9) or (current_month == 10) or (current_month == 11) or (current_month == 12)):
    semester = 1
    college = 0
    year = n
@@ -288,7 +291,7 @@ elif ((today.month == 9) or (today.month == 10) or (today.month == 11) or (today
 else:
    pass
 
-deleting all pdfs and csvs
+# deleting all pdfs and csvs
 filelist1 = glob.glob(os.path.join(r"C:\Users\jd721\bthoRegistration\gradepdfs", "*.pdf"))
 filelist2 = glob.glob(os.path.join(r"C:\Users\jd721\bthoRegistration\gradecsvs", "*.csv"))
 for f in filelist1:

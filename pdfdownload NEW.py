@@ -15,6 +15,7 @@ colleges = ['AE','AG','AR','AP','GB','BA','DN','ED','EN','GV','GE','SL','LA',\
             'MD','MS','NU','CP_PROF','PH','QT','SC','VM','VM_PROF']
 today = datetime.today() # current date
 n = today.year
+current_month = today.month
 working_pdfs = []
 
 # download gradereport.pdf
@@ -40,14 +41,14 @@ while year < n:
     semester = 1
 
 # current year spring
-if today.month == ("June" or "July" or "August" or "September"):
+if ((current_month == 6) or (current_month == 7) or (current_month == 8)):
     semester = 1
     while college < len(colleges):
         download_url = "http://web-as.tamu.edu/gradereport/PDFReports/" + str(year) + str(semester) + "/grd" + str(year) + str(semester) + colleges[college] + ".pdf"
         download_filenew(download_url)
         college += 1
 # current year spring & summer
-elif today.month == ("September" or "October" or "November" or "December"):
+elif ((current_month == 9) or (current_month == 10) or (current_month == 11) or (current_month == 12)):
     semester = 1
     while semester < 3:
         while college < len(colleges):
