@@ -1,0 +1,9 @@
+{
+  "manifest_version": 2,
+  "name": "BTHORegistration",
+  "version": "1.0",
+  "description": "Improves the course registration process for Aggies everywhere.",
+  "background": {},
+  "browser_action": {},
+  "icons": {}
+}
