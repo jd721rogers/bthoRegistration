@@ -1,9 +1,13 @@
 {
-  "manifest_version": 2,
-  "name": "BTHORegistration",
-  "version": "1.0",
-  "description": "Improves the course registration process for Aggies everywhere.",
-  "background": {},
-  "browser_action": {},
-  "icons": {}
+    "manifest_version": 2,
+    "name": "BTHORegistration",
+    "version": "0.1",
+    "description": "Improves the course registration process for Aggies everywhere.",
+    "content_scripts": [
+    {
+        "matches": [
+            "https://compassxe-ssb.tamu.edu/StudentRegistrationSsb/ssb/classSearch/classSearch"
+        ],
+        "js": ["js/jQuery.min.js", "js/content.js"]
+    }]
 }
