@@ -9,5 +9,9 @@
             "https://compassxe-ssb.tamu.edu/StudentRegistrationSsb/ssb/classSearch/classSearch"
         ],
         "js": ["js/jQuery.min.js", "js/content.js"]
-    }]
+    }],
+    "browser_action": {
+        "default_icon": "bthor.png",
+        "default_popup": "popup.html"
+    }
 }
