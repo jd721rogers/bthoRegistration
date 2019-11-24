@@ -11,9 +11,13 @@ $( function checkForResults() {
 
             if (!($( "[data-property='gradeDistrTitle']" ).length) ) {
                 // Change headers
-                titleHTML = '<th scope="col" data-sort-direction="disabled" data-property="gradeDistrTitle" xe-field="gradeDistr" style="width: 15%;" data-hide="phone"><div class="title" title="Grade Distribution" style="width: auto;">Status</div><div class="sort-handle" style="height:100%;width:5px;cursor:w-resize;"></div></th>';
-                var gradeDistributionTitle = $( titleHTML ).text("Grade Distributions");
+                titleHTML = '<th scope="col" data-sort-direction="disabled" data-property="gradeDistr" xe-field="gradeDistr" style="width: 15%;" data-hide="phone"><div class="title" title="Grade Distribution" style="width: auto;">Grade Distribution</div><div class="sort-handle" style="height:100%;width:5px;cursor:w-resize;"></div></th>';
+                var gradeDistributionTitle = $( titleHTML );
                 $( "[data-property='instructor']" ).slice(0,1).after(gradeDistributionTitle);
+                titleHTML = '<th scope="col" data-sort-direction="disabled" data-property="RMP" xe-field="RMP" style="width: 15%;" data-hide="phone"><div class="title" title="Rate My Professors" style="width: auto;">Rate My Professors</div><div class="sort-handle" style="height:100%;width:5px;cursor:w-resize;"></div></th>';
+                var rmpTitle = $( titleHTML );
+                $( "[data-property='gradeDistr']" ).slice(0,1).after(rmpTitle);
+                $("[data-property='RMP']" ).slice(0,1).width(140);
                 moveAttrTitle = $( "[data-property='attribute']" ).slice(0,1).detach();
                 moveTermTitle = $( "[data-property='termType']" ).slice(0,1).detach();
                 $( "[data-property='status']" ).slice(0,1).after(moveTermTitle);
@@ -21,6 +25,7 @@ $( function checkForResults() {
                 $( "[data-property='courseReferenceNumber']" ).slice(0,1).width(50);
                 $( "[data-property='courseTitle']" ).slice(0,1).text( "Basic Course Info" );
                 $( "[data-property='courseTitle']" ).slice(0,1).width(200);
+                $( "[data-property='meetingTime']" ).slice(0,1).width(250);
             }
 
             // Loop through each row        
@@ -40,22 +45,36 @@ $( function checkForResults() {
                 status = $( "[data-property='status']" ).slice(i,i+1).find("span").first().text();
                 remainingSpots = (status == "FULL") ? "0" : status;
                 instructorName = $( "[data-property='instructor']" ).slice(i,i+1).find("a").text();
+                names = instructorName.split(" ");
+                firstName = names[0];
+                lastName = names[names.length - 1];
                 moveAttr = attributes.detach();
                 moveTerm = $( "[data-property='termType']" ).slice(i,i+1).detach();
 
                 // Reformatting table
                 $( "[data-property='courseReferenceNumber']" ).slice(i,i+1).width(50);
                 $( "[data-property='courseTitle']" ).slice(i,i+1).width(200);
+                $( "[data-property='meetingTime']" ).slice(i,i+1).width(250);
                 $( "[data-property='status']" ).slice(i,i+1).after(moveTerm);
                 $( "[data-property='status']" ).slice(i,i+1).after(moveAttr);
                 console.log("Row " + i.toString() + " " + subj + courseNum + "-" + section + ": \n" + remainingSpots + " seats available with " + instructorName + " & CRN: " + crn);
                 newHTML = '<td data-property="gradeDistr" xe-field="gradeDistr" class="readonly" data-content="grades" style="width: 15%;"></td>';
-                var gradeDistribution = $( newHTML ).text("alexa play marvins room D:");
+                var gradeDistribution = $( newHTML ).text("alexa play marvins room");
                 $( "[data-property='instructor']" ).slice(i,i+1).after(gradeDistribution);
+                newHTML = '<a data-property="RMP" xe-field="RMP" class="readonly" data-content="rmpLink" style="width: 10%;">smhh i should rly go to bed D:</a>';
+                var rmp = $( newHTML );
+                $( "[data-property='gradeDistr']" ).slice(i,i+1).after(rmp);
+                $("[data-property='RMP']" ).slice(i,i+1).width(140);
                 addCrsInfo = $( "[data-property='courseTitle']" ).slice(i,i+1).find("span");
                 $("<p>Course: " + subj + courseNum + "</p>").insertBefore(addCrsInfo);
                 $("<p>Section: " + section + "</p>").insertBefore(addCrsInfo);
                 $("<p>Credit Hours: " + hours + "</p>").insertBefore(addCrsInfo);
+
+                // RMP Link
+                searchStr = "https://www.ratemyprofessors.com/search.jsp?query=" + firstName + "+" + lastName
+                $( "[data-property='RMP']" ).slice(i,i+1).attr("href",searchStr);
+                $( "[data-property='RMP']" ).slice(i,i+1).attr("target","_blank");
+
 
             }
         }
