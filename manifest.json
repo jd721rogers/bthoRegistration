@@ -8,6 +8,16 @@
         "matches": [
             "https://compassxe-ssb.tamu.edu/StudentRegistrationSsb/ssb/classSearch/classSearch"
         ],
-        "js": ["js/jQuery.min.js", "js/content.js"]
-    }]
+        "js": ["js/jQuery.min.js", "js/sql-memory-growth.js", "js/content.js"]
+    }],
+    "web_accessible_resources": [
+        "grades.db", "bthor128.png"
+    ],    
+    "browser_action": {
+        "default_icon": "bthor.png",
+        "default_popup": "popup.html"
+    },
+    "icons": {
+        "128": "bthor128.png"
+    }
 }
