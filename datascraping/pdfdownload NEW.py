@@ -7,7 +7,7 @@ import urllib.request
 import os
 from datetime import datetime
 
-os.chdir(r"C:\Users\jd721\bthoRegistration\gradepdfs")
+os.chdir(r"C:\Users\jd721\bthoRegistration\push\bthoRegistration\datascraping\gradepdfs")
 year = 2010
 semester = 1 # Spring = 1, Summer = 2, Fall = 3
 college = 0
@@ -32,7 +32,7 @@ def download_filenew(download_url):
 while year < n:
     while semester <= 3:
         while college < len(colleges):
-            download_url = "http://web-as.tamu.edu/gradereport/PDFReports/" + str(year) + str(semester) + "/grd" + str(year) + str(semester) + colleges[college] + ".pdf"
+            download_url = "http://web-as.tamu.edu/GradeReports/PDFReports/" + str(year) + str(semester) + "/grd" + str(year) + str(semester) + colleges[college] + ".pdf"
             download_filenew(download_url)
             college += 1
         college = 0
@@ -44,7 +44,7 @@ while year < n:
 if ((current_month == 6) or (current_month == 7) or (current_month == 8)):
     semester = 1
     while college < len(colleges):
-        download_url = "http://web-as.tamu.edu/gradereport/PDFReports/" + str(year) + str(semester) + "/grd" + str(year) + str(semester) + colleges[college] + ".pdf"
+        download_url = "http://web-as.tamu.edu/GradeReports/PDFReports/" + str(year) + str(semester) + "/grd" + str(year) + str(semester) + colleges[college] + ".pdf"
         download_filenew(download_url)
         college += 1
 # current year spring & summer
@@ -52,7 +52,7 @@ elif ((current_month == 9) or (current_month == 10) or (current_month == 11) or 
     semester = 1
     while semester < 3:
         while college < len(colleges):
-            download_url = "http://web-as.tamu.edu/gradereport/PDFReports/" + str(year) + str(semester) + "/grd" + str(year) + str(semester) + colleges[college] + ".pdf"
+            download_url = "http://web-as.tamu.edu/GradeReports/PDFReports/" + str(year) + str(semester) + "/grd" + str(year) + str(semester) + colleges[college] + ".pdf"
             download_filenew(download_url)
             college += 1
         semester += 1
