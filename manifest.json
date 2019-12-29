@@ -1,8 +1,8 @@
 {
     "manifest_version": 2,
-    "name": "BTHORegistration",
+    "name": "bthoRegistration",
     "version": "0.1",
-    "description": "Improves the course registration process for Aggies everywhere.",
+    "description": "Improves the course registration process for Texas A&M students in the university's registration portal.",
     "content_scripts": [
     {
         "matches": [
