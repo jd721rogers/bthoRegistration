@@ -11,7 +11,7 @@ import glob
 import shutil
 import sqlite3
 import os
-import urllib
+import requests
 import tabula
 from datetime import datetime
 
@@ -34,14 +34,17 @@ def download_file(download_url,pdf_ref,working_pdfs):
    # if statement checks if there is an available .pdf for college/year/semester input
    if (working_pdfs[pdf_ref]) == 1:
       file_name = download_url[download_url.find('grd'):len(download_url)] 
-      urllib.request.urlretrieve(download_url,file_name)
+      r = requests.get(download_url,verify=False)
+      with open(file_name,"wb") as p:
+         p.write(r.content)
+         p.close()   
    else:
       pass
 
 # get grade data from downloaded grade reports
 def getGrades(url,yr,sem,col):
    # change current working directory
-   os.chdir(r"C:\Users\jd721\bthoRegistration\gradepdfs")
+   os.chdir(r"C:\Users\jd721\bthoRegistration\push\datascraping\gradepdfs")
    # read pdf file into an array of dataframes
    grades_df = tabula.read_pdf("grd" + str(yr) + str(sem) + str(col) + ".pdf", outputFormat = "dataFrame", pages = 'all', stream = True, multiple_tables = True, \
                               area = (129.6,25.2,536.4,750))
@@ -49,26 +52,26 @@ def getGrades(url,yr,sem,col):
    i = 0
    # converts each dataframe into a csv
    while i < len(grades_df):
-      grade_iter = grades_df[i].to_csv(r'C:\Users\jd721\bthoRegistration\tabula\grade_iter' + str(i) + '.csv', index = False)
+      grade_iter = grades_df[i].to_csv(r'C:\Users\jd721\bthoRegistration\push\datascraping\tabula\grade_iter' + str(i) + '.csv', index = False)
       i += 1
    # change current working directory
-   os.chdir(r"C:\Users\jd721\bthoRegistration\tabula")
+   os.chdir(r"C:\Users\jd721\bthoRegistration\push\datascraping\tabula")
    # generate a list of all the filenames to combine
    all_csvs = [j for j in glob.glob('*.{}'.format('csv'))]
-   num_csvs = len(os.listdir(r"C:\Users\jd721\bthoRegistration\tabula"))
+   num_csvs = len(os.listdir(r"C:\Users\jd721\bthoRegistration\push\datascraping\tabula"))
    # read all csv files into one dataframe
    grades_csv = pd.concat([pd.read_csv(f) for f in all_csvs], sort=False)
    # convert combined dataframe into a csv
    grades_csv.to_csv( "grades_csv.csv", index = False, encoding = 'utf-8-sig')
    # copying grades_csv as new specific filename
    whichpdf = "grd" + str(yr) + str(sem) + str(col)
-   shutil.copyfile(r"C:\Users\jd721\bthoRegistration\tabula\grades_csv.csv","C:/Users/jd721/bthoRegistration/gradecsvs/" + whichpdf + ".csv")
+   shutil.copyfile(r"C:\Users\jd721\bthoRegistration\push\datascraping\tabula\grades_csv.csv","C:/Users/jd721/bthoRegistration/push/datascraping/gradecsvs/" + whichpdf + ".csv")
    # deleting all csv files in folder
-   filelist = glob.glob(os.path.join(r"C:\Users\jd721\bthoRegistration\tabula", "*.csv"))
+   filelist = glob.glob(os.path.join(r"C:\Users\jd721\bthoRegistration\push\datascraping\tabula", "*.csv"))
    for f in filelist:
       os.remove(f)
    # open csv file
-   os.chdir(r"C:\Users\jd721\bthoRegistration\gradecsvs")
+   os.chdir(r"C:\Users\jd721\bthoRegistration\push\datascraping\gradecsvs")
    with open("grd" + str(yr) + str(sem) + str(col) + ".csv", encoding="utf8") as csvfile:
       # read csv file
       readGrades = csv.reader(csvfile, delimiter=",")
@@ -133,7 +136,10 @@ def getGrades(url,yr,sem,col):
                Q = str(row[11])
                instr = row[14]
             else:
-               raise Exception('Need to account for a new version of csv format. ;(')
+               void = "VOID"
+               D = "VOID"
+               F = "VOID"
+               instr = "VOID"
             # accounting for another weird tabula thing
             if F == "":
                if len(D) == 4:
@@ -192,36 +198,7 @@ colleges = ['AE','AG','AR','AP','GB','BA','DN','ED','EN','GV','GE','SL','LA',\
 pdf_ref = 0
 
 # array for referencing whether there is an available pdf from previous years/semesters/colleges
-# each row is a semester&year combination and each number slot represents a college for that combination
-working_pdfs = [0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 1, 0, 1, 0, 0, 0, 1, 1, 1, 0, \
-                0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 1, 1, 1, 0, \
-                0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 1, 0, 1, 0, 0, 0, 1, 1, 1, 0, \
-                0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 1, 0, 1, 0, 0, 0, 1, 1, 1, 0, \
-                0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 1, 0, 1, 0, 0, 0, 1, 1, 1, 0, \
-                0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 1, 0, 1, 0, 0, 0, 1, 1, 1, 0, \
-                0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 1, 0, 1, 0, 0, 0, 1, 1, 1, 0, \
-                0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 1, 0, 1, 0, 0, 0, 1, 1, 1, 0, \
-                0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 1, 0, 1, 0, 0, 0, 1, 1, 1, 0, \
-                0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 1, 0, 1, 0, 0, 0, 1, 1, 1, 0, \
-                0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 1, 0, 1, 0, 0, 0, 1, 1, 1, 0, \
-                0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 1, 0, 1, 0, 0, 0, 1, 1, 1, 0, \
-                0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 1, 0, 1, 0, 0, 0, 1, 1, 1, 0, \
-                0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 1, 0, 1, 0, 0, 0, 1, 1, 1, 0, \
-                0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 1, 0, 1, 0, 0, 0, 1, 1, 1, 0, \
-                0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, \
-                0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, \
-                0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, \
-                0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, \
-                0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, \
-                1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, \
-                1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, \
-                0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, \
-                1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, \
-                1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, \
-                1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, \
-                1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, \
-                1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 1, 0]
-
+working_pdfs = [0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 1, 0, 1, 0, 0, 0, 1, 1, 1, 0, 0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 1, 0, 1, 0, 0, 0, 1, 1, 1, 0, 0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 1, 0, 1, 0, 0, 0, 1, 1, 1, 0, 0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 1, 0, 1, 0, 0, 0, 1, 1, 1, 0, 0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 1, 0, 1, 0, 0, 0, 1, 1, 1, 0, 0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 1, 0, 1, 0, 0, 0, 1, 1, 1, 0, 0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 1, 0, 1, 0, 0, 0, 1, 1, 1, 0, 0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 1, 0, 1, 0, 0, 0, 1, 1, 1, 0, 0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 1, 0, 1, 0, 0, 0, 1, 1, 1, 0, 0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 1, 0, 1, 0, 0, 0, 1, 1, 1, 0, 0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 1, 0, 1, 0, 0, 0, 1, 1, 1, 0, 0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 1, 0, 1, 0, 0, 0, 1, 1, 1, 0, 0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 1, 0, 1, 0, 0, 0, 1, 1, 1, 0, 0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 1, 0, 1, 0, 0, 0, 1, 1, 1, 0, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
 
 # loops through every college for every semester and every year and downloads available grade reports
 # Also parses through grade reports to obtain grade data
@@ -243,7 +220,7 @@ while year < n:
          else:
             download_url = "http://web-as.tamu.edu/gradereport/PDFReports/" + str(year) + str(semester)\
             + "/grd" + str(year) + str(semester) + colleges[college] + ".pdf"
-            os.chdir(r"C:\Users\jd721\bthoRegistration\gradepdfs")
+            os.chdir(r"C:\Users\jd721\bthoRegistration\push\datascraping\gradepdfs")
             download_file(download_url,pdf_ref,working_pdfs)
             if (working_pdfs[pdf_ref]) == 1:
                getGrades(download_url,year,semester,colleges[college])
@@ -264,7 +241,7 @@ if ((current_month == 6) or (current_month == 7) or (current_month == 8)):
    while college < len(colleges):
       download_url = "http://web-as.tamu.edu/gradereport/PDFReports/" + str(year) + str(semester)\
       + "/grd" + str(year) + str(semester) + colleges[college] + ".pdf"
-      os.chdir(r"C:\Users\jd721\bthoRegistration\gradepdfs")
+      os.chdir(r"C:\Users\jd721\bthoRegistration\push\datascraping\gradepdfs")
       download_file(download_url,pdf_ref,working_pdfs)
       if (working_pdfs[pdf_ref]) == 1:
          getGrades(download_url,year,semester,colleges[college])
@@ -279,7 +256,7 @@ elif ((current_month == 9) or (current_month == 10) or (current_month == 11) or 
       while college < len(colleges):
          download_url = "http://web-as.tamu.edu/gradereport/PDFReports/" + str(year) + str(semester)\
          + "/grd" + str(year) + str(semester) + colleges[college] + ".pdf"
-         os.chdir(r"C:\Users\jd721\bthoRegistration\gradepdfs")
+         os.chdir(r"C:\Users\jd721\bthoRegistration\push\datascraping\gradepdfs")
          download_file(download_url,pdf_ref,working_pdfs)
          if (working_pdfs[pdf_ref]) == 1:
             getGrades(download_url,year,semester,colleges[college])
@@ -292,8 +269,8 @@ else:
    pass
 
 # deleting all pdfs and csvs
-filelist1 = glob.glob(os.path.join(r"C:\Users\jd721\bthoRegistration\gradepdfs", "*.pdf"))
-filelist2 = glob.glob(os.path.join(r"C:\Users\jd721\bthoRegistration\gradecsvs", "*.csv"))
+filelist1 = glob.glob(os.path.join(r"C:\Users\jd721\bthoRegistration\push\datascraping\gradepdfs", "*.pdf"))
+filelist2 = glob.glob(os.path.join(r"C:\Users\jd721\bthoRegistration\push\datascraping\gradecsvs", "*.csv"))
 for f in filelist1:
    os.remove(f)
 for f in filelist2:

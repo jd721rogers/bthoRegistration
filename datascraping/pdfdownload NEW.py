@@ -3,11 +3,11 @@ testing pdfdownload_new
 
 This file gets the array that is used for working_pdfs. Need to use to update working_pdfs in datascrape.py
 """
-import urllib.request
+import requests
 import os
 from datetime import datetime
 
-os.chdir(r"C:\Users\jd721\bthoRegistration\gradepdfs")
+os.chdir(r"C:\Users\jd721\bthoRegistration\push\datascraping\gradepdfs")
 year = 2010
 semester = 1 # Spring = 1, Summer = 2, Fall = 3
 college = 0
@@ -22,17 +22,20 @@ working_pdfs = []
 def download_filenew(download_url):
     file_name = download_url[download_url.find('grd'):len(download_url)] 
     temp = 1
-    try:
-        urllib.request.urlretrieve(download_url,file_name)
-    except:
-        temp = 0
+    r = requests.get(download_url,verify=False)
+    if (str(r.content).find("The resource you are looking for might have been removed, had its name changed, or is temporarily unavailable") == -1):
+       with open(file_name,"wb") as p:
+          p.write(r.content)
+          p.close()    
+    else:
+       temp = 0
     working_pdfs.append(temp)
 
 # only goes up to previous year
 while year < n:
     while semester <= 3:
         while college < len(colleges):
-            download_url = "http://web-as.tamu.edu/gradereport/PDFReports/" + str(year) + str(semester) + "/grd" + str(year) + str(semester) + colleges[college] + ".pdf"
+            download_url = "https://web-as.tamu.edu/GradeReports/PDFReports/" + str(year) + str(semester) + "/grd" + str(year) + str(semester) + colleges[college] + ".pdf"
             download_filenew(download_url)
             college += 1
         college = 0
@@ -44,7 +47,7 @@ while year < n:
 if ((current_month == 6) or (current_month == 7) or (current_month == 8)):
     semester = 1
     while college < len(colleges):
-        download_url = "http://web-as.tamu.edu/gradereport/PDFReports/" + str(year) + str(semester) + "/grd" + str(year) + str(semester) + colleges[college] + ".pdf"
+        download_url = "https://web-as.tamu.edu/GradeReports/PDFReports/" + str(year) + str(semester) + "/grd" + str(year) + str(semester) + colleges[college] + ".pdf"
         download_filenew(download_url)
         college += 1
 # current year spring & summer
@@ -52,7 +55,7 @@ elif ((current_month == 9) or (current_month == 10) or (current_month == 11) or 
     semester = 1
     while semester < 3:
         while college < len(colleges):
-            download_url = "http://web-as.tamu.edu/gradereport/PDFReports/" + str(year) + str(semester) + "/grd" + str(year) + str(semester) + colleges[college] + ".pdf"
+            download_url = "https://web-as.tamu.edu/GradeReports/PDFReports/" + str(year) + str(semester) + "/grd" + str(year) + str(semester) + colleges[college] + ".pdf"
             download_filenew(download_url)
             college += 1
         semester += 1
