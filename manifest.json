@@ -1,6 +1,9 @@
 {
     "manifest_version": 2,
     "name": "bthoRegistration",
+    "permissions": [
+        "storage"
+    ],
     "version": "0.1",
     "description": "Improves the course registration process for Texas A&M students in the university's registration portal.",
     "content_scripts": [
@@ -8,10 +11,11 @@
         "matches": [
             "https://compassxe-ssb.tamu.edu/StudentRegistrationSsb/ssb/classSearch/classSearch"
         ],
-        "js": ["js/jQuery.min.js", "js/sql-memory-growth.js", "js/content.js", "js/canvasjs.min.js"]
+        "js": ["js/jQuery.min.js", "js/sql-memory-growth.js", "js/content.js", "js/canvasjs.min.js", "js/popup.js"
+        ]
     }],
     "web_accessible_resources": [
-        "grades.db", "bthor128.png", "RMP.png"
+        "grades.db", "bthor128.png", "RMP.png", "add_class.png"
     ],    
     "browser_action": {
         "default_icon": "bthor.png",
