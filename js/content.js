@@ -196,111 +196,115 @@ $( function checkForResults() {
                 // Add to popup schedule
                 $("tbody").on('click', '#addSchButton', function () {
 
-                    row = $(this).closest('tr');
-                    if ($(row).find( "[data-property='termType']" ).find("span").first().text().substring(0,8) == "STANDARD") {
-                        instructor = $(row).find("[data-property='instructor']").find("a").text();
-                        names = instructor.split(" ");
-                        firstName = names[0];
-                        lastName = names[names.length - 1];
-                        thisClass = $(row).find( "[data-property='courseTitle']" ).find("p").first().text().split(" ")[1];
-                        meetingTimes = $(row).find( "[data-property='meetingTime']" ).children();
-                        section = $(row).find( "[data-property='courseTitle']" ).find("p").eq(1).text().split(" ")[1];
-                        var allDataToSend = [];
-                        $(meetingTimes).each( function() {
-                            possibleDays = $(this).find("li");
-                            daysArray = [];
-                            $(possibleDays).each( function() {
-                                if ($(this).attr("aria-checked") == "true") {
-                                    daysArray.push(1);
+                    try {    
+                        row = $(this).closest('tr');
+                        if ($(row).find( "[data-property='termType']" ).find("span").first().text().substring(0,8) == "STANDARD") {
+                            instructor = $(row).find("[data-property='instructor']").find("a").text();
+                            names = instructor.split(" ");
+                            firstName = names[0];
+                            lastName = names[names.length - 1];
+                            thisClass = $(row).find( "[data-property='courseTitle']" ).find("p").first().text().split(" ")[1];
+                            meetingTimes = $(row).find( "[data-property='meetingTime']" ).children();
+                            section = $(row).find( "[data-property='courseTitle']" ).find("p").eq(1).text().split(" ")[1];
+                            var allDataToSend = [];
+                            $(meetingTimes).each( function() {
+                                possibleDays = $(this).find("li");
+                                daysArray = [];
+                                $(possibleDays).each( function() {
+                                    if ($(this).attr("aria-checked") == "true") {
+                                        daysArray.push(1);
+                                    }
+                                    else {
+                                        daysArray.push(0);
+                                    }
+                                });
+                                times = $(this).find("span").first();
+                                newTimes = $(times).text().split("-");
+                                startTime = newTimes[0].trim().replace(" ","");
+                                if (startTime.slice(-2) == "AM") {
+                                    if (startTime.slice(0,2) == "12") {
+                                        beginTime = "00" + startTime.slice(2,5);
+                                    }
+                                    else {
+                                        beginTime = startTime.slice(0,5);
+                                    }
                                 }
                                 else {
-                                    daysArray.push(0);
+                                    if (startTime.slice(0,2) == "12") {
+                                        beginTime = startTime.slice(0,5);
+                                    }
+                                    else {
+                                        beginTime = (parseInt(startTime.slice(0,2))+12).toString() + startTime.slice(2,5);
+                                    }
                                 }
+                                endTime = newTimes[1].trim().replace(" ","");
+                                if (endTime.slice(-2) == "AM") {
+                                    if (endTime.slice(0,2) == "12") {
+                                        stopTime = "00" + endTime.slice(2,5);
+                                    }
+                                    else {
+                                        stopTime = endTime.slice(0,5);
+                                    }
+                                }
+                                else {
+                                    if (endTime.slice(0,2) == "12") {
+                                        stopTime = endTime.slice(0,5);
+                                    }
+                                    else {
+                                        stopTime = (parseInt(endTime.slice(0,2))+12).toString() + endTime.slice(2,5);
+                                    }
+                                }
+                                checkPlace = $(this).find("span.tooltip-row");
+                                ret = 'nope';
+                                for (j=0;j<$(checkPlace).length;j++) {
+                                    try{ 
+                                        if($(checkPlace)[j].innerText.trim().substring(0,10) == "Building: "){
+                                            ret = j;
+                                        }
+                                    }
+                                    catch(err) {}
+                                }
+                                if (ret != 'nope') {
+                                    bldg = $(checkPlace)[ret].innerText.trim().replace('Building: ','').replace('"','').replace('"','');
+                                }
+                                else {bldg = "";}
+                                checkPlace = $(this).find("span.tooltip-row");
+                                ret = 'nope';
+                                for (j=0;j<$(checkPlace).length;j++) {
+                                    try{
+                                        if ($(checkPlace)[j].innerText.trim().substring(0,6) == "Room: ") {
+                                            ret = j;
+                                        }
+                                    }
+                                    catch (err) {}
+                                }
+                                if (ret != 'nope') {
+                                    roomNum = $(checkPlace)[ret].innerText.trim().replace('Room: ','').replace('"','').replace('"','');
+                                }
+                                else {roomNum = "";}
+                                // Compiling data into json to send to popup
+                                dataToSend = {
+                                    days: daysArray,
+                                    name1 : firstName,
+                                    name2 : lastName,
+                                    className: thisClass,
+                                    start: beginTime,
+                                    end: stopTime,
+                                    building: bldg,
+                                    classroom: roomNum,
+                                    section: section
+                                }
+                                allDataToSend.push(dataToSend);
                             });
-                            times = $(this).find("span").first();
-                            newTimes = $(times).text().split("-");
-                            startTime = newTimes[0].trim().replace(" ","");
-                            if (startTime.slice(-2) == "AM") {
-                                if (startTime.slice(0,2) == "12") {
-                                    beginTime = "00" + startTime.slice(2,5);
-                                }
-                                else {
-                                    beginTime = startTime.slice(0,5);
-                                }
-                            }
-                            else {
-                                if (startTime.slice(0,2) == "12") {
-                                    beginTime = startTime.slice(0,5);
-                                }
-                                else {
-                                    beginTime = (parseInt(startTime.slice(0,2))+12).toString() + startTime.slice(2,5);
-                                }
-                            }
-                            endTime = newTimes[1].trim().replace(" ","");
-                            if (endTime.slice(-2) == "AM") {
-                                if (endTime.slice(0,2) == "12") {
-                                    stopTime = "00" + endTime.slice(2,5);
-                                }
-                                else {
-                                    stopTime = endTime.slice(0,5);
-                                }
-                            }
-                            else {
-                                if (endTime.slice(0,2) == "12") {
-                                    stopTime = endTime.slice(0,5);
-                                }
-                                else {
-                                    stopTime = (parseInt(endTime.slice(0,2))+12).toString() + endTime.slice(2,5);
-                                }
-                            }
-                            checkPlace = $(this).find("span.tooltip-row");
-                            ret = 'nope';
-                            for (j=0;j<$(checkPlace).length;j++) {
-                                try{ 
-                                    if($(checkPlace)[j].innerText.trim().substring(0,10) == "Building: "){
-                                        ret = j;
-                                    }
-                                }
-                                catch(err) {}
-                            }
-                            if (ret != 'nope') {
-                                bldg = $(checkPlace)[ret].innerText.trim().replace('Building: ','').replace('"','').replace('"','');
-                            }
-                            else {bldg = "";}
-                            checkPlace = $(this).find("span.tooltip-row");
-                            ret = 'nope';
-                            for (j=0;j<$(checkPlace).length;j++) {
-                                try{
-                                    if ($(checkPlace)[j].innerText.trim().substring(0,6) == "Room: ") {
-                                        ret = j;
-                                    }
-                                }
-                                catch (err) {}
-                            }
-                            if (ret != 'nope') {
-                                roomNum = $(checkPlace)[ret].innerText.trim().replace('Room: ','').replace('"','').replace('"','');
-                            }
-                            else {roomNum = "";}
-                            // Compiling data into json to send to popup
-                            dataToSend = {
-                                days: daysArray,
-                                name1 : firstName,
-                                name2 : lastName,
-                                className: thisClass,
-                                start: beginTime,
-                                end: stopTime,
-                                building: bldg,
-                                classroom: roomNum,
-                                section: section
-                            }
-                            allDataToSend.push(dataToSend);
-                        });
-                        sendData(allDataToSend);
-                        $(this).remove();
+                            sendData(allDataToSend);
+                            $(this).remove();
+                        }
+                        else {
+                            alert("Cannot add online classes");
+                        }    
+                    } catch (error) {
+                        alert('Extension Timeout. Refresh Page.')
                     }
-                    else {
-                        alert("Cannot add online classes");
-                    }    
                 });    
 
                 // Display ratemyprof results when icon is clicked

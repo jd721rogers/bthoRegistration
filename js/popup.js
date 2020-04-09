@@ -41,7 +41,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // Clears entire Schedule
     document.getElementById("clearSchedule").addEventListener("click", function(){
         events = calendar.getEvents();
-        console.log(events)
         for (g=0;g<events.length;g++) {
             events[g].remove();
         }
@@ -50,14 +49,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Removes a class from schedule
     document.getElementById("removeClass").addEventListener("change", function(){
-        classToRemove = document.getElementById("removeClass").options[document.getElementById("removeClass").selectedIndex].text.substring(0,7);
+        classToRemove = document.getElementById("removeClass").options[document.getElementById("removeClass").selectedIndex].text;
+        classText = classToRemove.substring(0,7);
+        sectionText = classToRemove.split(" ")[2];
         if (classToRemove != "Select") {
             events = calendar.getEvents();
             for (i=0;i<events.length;i++) {
-                if (events[i].title.substring(0,7) == classToRemove) {
+                if (events[i].title.substring(0,7) == classText && events[i].title.split(" ")[2].substring(0,3) == sectionText) {
                     removeID = events[i].id;
                     calendar.getEventById(removeID).remove();
-                    removeClass(classToRemove);
+                    removeClass(classText,sectionText);
                 }
             }
         }
@@ -73,13 +74,13 @@ function getClass() {
     });
 }
 
-function getClass2(theClass) {
+function getClass2(theClass,section) {
     return new Promise((resolveFunc) => {
         chrome.storage.local.get(['myClass'], function(result) {
             allClasses = result.myClass;
             for (k=0;k<Object.keys(allClasses).length;k++) {
                 var index = "class"+k.toString();
-                if (allClasses[index][0].className == theClass) {
+                if (allClasses[index][0].className == theClass && allClasses[index][0].section == section) {
                     allClasses[index] =
                         [{
                             days: "none",
@@ -99,8 +100,8 @@ function getClass2(theClass) {
     });
 }
 
-async function removeClass(theClass) {
-    allClasses = await getClass2(theClass);
+async function removeClass(theClass,section) {
+    allClasses = await getClass2(theClass,section);
     chrome.storage.local.set({'myClass': allClasses}, function() {
         console.log('class was removed from storage!');
     });            
@@ -113,7 +114,6 @@ async function addClasses(calendar) {
     eventId = 0;
     // Looping through storage items
     for (j=0;j<Object.keys(allClasses).length;j++){
-        console.log("class"+j.toString());
         thisClass = allClasses["class"+j.toString()];
         classColor = '#'+Math.floor(Math.random()*16777215).toString(16);
         // Looping through meeting times
