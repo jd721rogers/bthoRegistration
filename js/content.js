@@ -19,7 +19,11 @@ $( function checkForResults() {
             titleHTML = '<th scope="col" data-sort-direction="disabled" data-property="RMP" xe-field="RMP" style="width: 15%;" data-hide="phone"><div class="title" title="Rate My Professors" style="width: auto;">Rate My Professors</div><div class="sort-handle" style="height:100%;width:5px;cursor:w-resize;"></div></th>';
             var rmpTitle = $( titleHTML );
             $( "[data-property='gradeDistr']" ).slice(0,1).after(rmpTitle);
+            titleHTML = '<th scope="col" data-sort-direction="disabled" data-property="sch" xe-field="sch" style="width: 15%;" data-hide="phone"><div class="title" title="Popup Schedule" style="width: auto;">Add to Popup</div><div class="sort-handle" style="height:100%;width:5px;cursor:w-resize;"></div></th>';
+            var add2SchTitle = $( titleHTML );
+            $( "[data-property='instructor']" ).slice(0,1).after(add2SchTitle);
             $("[data-property='RMP']" ).slice(0,1).width(140);
+            $("[data-property='sch']" ).slice(0,1).width(100);
             moveAttrTitle = $( "[data-property='attribute']" ).slice(0,1).detach();
             moveTermTitle = $( "[data-property='termType']" ).slice(0,1).detach();
             $( "[data-property='status']" ).slice(0,1).after(moveTermTitle);
@@ -42,7 +46,6 @@ $( function checkForResults() {
 
             // Loop through each row        
             var numRows = $( "[data-property='courseTitle']" ).length - 1;
-            console.log('numRows ' + numRows.toString());
             for ( i = 1; i <= numRows; i++ ) {
                 
                 // Getting data from table
@@ -70,7 +73,6 @@ $( function checkForResults() {
                 $( "[data-property='status']" ).slice(i,i+1).width(165);
                 $( "[data-property='status']" ).slice(i,i+1).after(moveTerm);
                 $( "[data-property='status']" ).slice(i,i+1).after(moveAttr);
-                console.log("Row " + i.toString() + " " + subject + courseNum + "-" + section + ": \n" + remainingSpots + " seats available with " + instructorName + " & CRN: " + crn);
                 newHTML = `<td data-property="gradeDistr" style="width: 100%;" data-content="grades" data-th="Plus"><image id="distButton" style="display: block; margin-left: auto; margin-right: auto; border:1px solid black" width="90" height="90" src='${chrome.extension.getURL('bthor128.png')}'/></td>`;
                 var gradeDistribution = $( newHTML )// .text("alexa play marvins room");
                 $( "[data-property='instructor']" ).slice(i,i+1).after(gradeDistribution);
@@ -78,6 +80,10 @@ $( function checkForResults() {
                 var rmp = $( newHTML );
                 $( "[data-property='gradeDistr']" ).slice(i,i+1).after(rmp);
                 $("[data-property='RMP']" ).slice(i,i+1).width(140);
+                newHTML = `<td data-property="sch" style="width: 100%;" data-content="addLogo" data-th="Plus"><image id="addSchButton" style="display: block; margin-left: auto; margin-right: auto; border:none" width="25" height="25" src='${chrome.extension.getURL('add_class.png')}'/></td>`;
+                var addToSchedule = $( newHTML );
+                $( "[data-property='instructor']" ).slice(i,i+1).after(addToSchedule);
+                $("[data-property='sch']" ).slice(i,i+1).width(100);
                 addCrsInfo = $( "[data-property='courseTitle']" ).slice(i,i+1).find("span");
                 $("<p>Course: " + subject + courseNum + "</p>").insertBefore(addCrsInfo);
                 $("<p>Section: " + section + "</p>").insertBefore(addCrsInfo);
@@ -104,7 +110,6 @@ $( function checkForResults() {
                     firstInit = names[0].charAt(0);
                     lastName = names[names.length - 1];
                     thisClass = $(row).find( "[data-property='courseTitle']" ).find("p").first().text().split(" ")[1];
-                    console.log(thisClass)
                     grdData = getDistribution(firstInit,lastName,thisClass);
                     // If professor has no grade data in .db, notify user.
                     if ( grdData === undefined ) {
@@ -188,7 +193,117 @@ $( function checkForResults() {
 
                 });
 
-                // Display grade distributions when icon is clicked
+                // Add to popup schedule
+                $("tbody").on('click', '#addSchButton', function () {
+
+                    row = $(this).closest('tr');
+                    if ($(row).find( "[data-property='termType']" ).find("span").first().text().substring(0,8) == "STANDARD") {
+                        instructor = $(row).find("[data-property='instructor']").find("a").text();
+                        names = instructor.split(" ");
+                        firstName = names[0];
+                        lastName = names[names.length - 1];
+                        thisClass = $(row).find( "[data-property='courseTitle']" ).find("p").first().text().split(" ")[1];
+                        meetingTimes = $(row).find( "[data-property='meetingTime']" ).children();
+                        section = $(row).find( "[data-property='courseTitle']" ).find("p").eq(1).text().split(" ")[1];
+                        var allDataToSend = [];
+                        $(meetingTimes).each( function() {
+                            possibleDays = $(this).find("li");
+                            daysArray = [];
+                            $(possibleDays).each( function() {
+                                if ($(this).attr("aria-checked") == "true") {
+                                    daysArray.push(1);
+                                }
+                                else {
+                                    daysArray.push(0);
+                                }
+                            });
+                            times = $(this).find("span").first();
+                            newTimes = $(times).text().split("-");
+                            startTime = newTimes[0].trim().replace(" ","");
+                            if (startTime.slice(-2) == "AM") {
+                                if (startTime.slice(0,2) == "12") {
+                                    beginTime = "00" + startTime.slice(2,5);
+                                }
+                                else {
+                                    beginTime = startTime.slice(0,5);
+                                }
+                            }
+                            else {
+                                if (startTime.slice(0,2) == "12") {
+                                    beginTime = startTime.slice(0,5);
+                                }
+                                else {
+                                    beginTime = (parseInt(startTime.slice(0,2))+12).toString() + startTime.slice(2,5);
+                                }
+                            }
+                            endTime = newTimes[1].trim().replace(" ","");
+                            if (endTime.slice(-2) == "AM") {
+                                if (endTime.slice(0,2) == "12") {
+                                    stopTime = "00" + endTime.slice(2,5);
+                                }
+                                else {
+                                    stopTime = endTime.slice(0,5);
+                                }
+                            }
+                            else {
+                                if (endTime.slice(0,2) == "12") {
+                                    stopTime = endTime.slice(0,5);
+                                }
+                                else {
+                                    stopTime = (parseInt(endTime.slice(0,2))+12).toString() + endTime.slice(2,5);
+                                }
+                            }
+                            checkPlace = $(this).find("span.tooltip-row");
+                            ret = 'nope';
+                            for (j=0;j<$(checkPlace).length;j++) {
+                                try{ 
+                                    if($(checkPlace)[j].innerText.trim().substring(0,10) == "Building: "){
+                                        ret = j;
+                                    }
+                                }
+                                catch(err) {}
+                            }
+                            if (ret != 'nope') {
+                                bldg = $(checkPlace)[ret].innerText.trim().replace('Building: ','').replace('"','').replace('"','');
+                            }
+                            else {bldg = "";}
+                            checkPlace = $(this).find("span.tooltip-row");
+                            ret = 'nope';
+                            for (j=0;j<$(checkPlace).length;j++) {
+                                try{
+                                    if ($(checkPlace)[j].innerText.trim().substring(0,6) == "Room: ") {
+                                        ret = j;
+                                    }
+                                }
+                                catch (err) {}
+                            }
+                            if (ret != 'nope') {
+                                roomNum = $(checkPlace)[ret].innerText.trim().replace('Room: ','').replace('"','').replace('"','');
+                            }
+                            else {roomNum = "";}
+                            // Compiling data into json to send to popup
+                            dataToSend = {
+                                days: daysArray,
+                                name1 : firstName,
+                                name2 : lastName,
+                                className: thisClass,
+                                start: beginTime,
+                                end: stopTime,
+                                building: bldg,
+                                classroom: roomNum,
+                                section: section
+                            }
+                            allDataToSend.push(dataToSend);
+                        });
+                        sendData(allDataToSend);
+                        $(this).remove();
+                    }
+                    else {
+                        alert("Cannot add online classes");
+                    }    
+                });    
+
+                // Display ratemyprof results when icon is clicked
                 $("tbody").on('click', '#rmpButton', function () {
 
                     console.log("rmp clicked");
@@ -210,6 +325,62 @@ $( function checkForResults() {
     setTimeout(checkForResults, 100);
 
 });
+
+// sends to popup
+async function sendData(newData) {
+    // checking for needed index value
+    currData = await findIndex(newData);
+    console.log(currData);
+
+    chrome.storage.local.set({'myClass': currData}, function() {
+        console.log('class data added!');
+    });            
+}
+
+function findIndex(newData) {
+    return new Promise((resolveFunc) => {
+        var index = "none";
+        var initial = "none";
+        chrome.storage.local.get(['myClass'], function(result) {
+            if (result.myClass == undefined) {
+                index = "class0";
+                initial = {
+                    class0: 
+                        [{
+                            days: "none",
+                            name1 : "none",
+                            name2 : "none",
+                            className: "none",
+                            start: "none",
+                            end: "none",
+                            building: "none",
+                            classroom: "none",
+                            section: "none"
+                        }]
+                };
+            }
+            else{
+                for (k=0;k<Object.keys(result.myClass).length;k++) {
+                    if (result.myClass["class"+k.toString()][0].className == "none") {
+                        index = "class"+k.toString();
+                        break;
+                    }
+                }
+                if (index == "none") {
+                    index = "class"+(Object.keys(result.myClass).length.toString());
+                }
+            }
+            if (initial != "none") {
+                obj = initial;
+            }
+            else {
+                obj = result.myClass;
+            }
+            obj[index] = newData;
+            resolveFunc(obj);
+        });
+    });
+}
 
 // Query the grades database
 function getDistribution(first,last,subj) {
