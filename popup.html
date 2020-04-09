@@ -1,23 +1,46 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <script src="js/jQuery.min.js"></script>
+    <script src="js/popup.js"></script>
+    <link href='js/fullcalendar/core/main.css' rel='stylesheet' />
+    <link href='js/fullcalendar/daygrid/main.css' rel='stylesheet' />
+    <link href='js/fullcalendar/timegrid/main.css' rel='stylesheet' />
+    <script src='js/fullcalendar/core/main.js'></script>
+    <script src='js/fullcalendar/daygrid/main.js'></script>
+    <script src='js/fullcalendar/timegrid/main.js'></script>
     <meta charset = "UTF-8">
     <meta name="viewport" content = "width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title> bthoRegistration</title>
 </head>
 <body style="background-color:white">
-    <div class="modal-header">
-        <h1 class="logo">
-            <img src="bthor440.jpg" alt="bthoRegistration" class = "logo-icon" border="3"> 
-        </h1>
-        <h2 class="howdy-link">
-            <a href="https://howdy.tamu.edu/uPortal/normal/render.uP" target="_blank"><font size="4">Howdy Portal</font></a>
-        </h2>
-        <h3 class="website-link">
-            <a href="http://www.bthoregistration.com" target="_blank"><font size="4">See more on our website!</font></a>
-        </h3>
+    <div style="width: 180px;height:111px;display: inline-block;text-align: center;vertical-align: middle;font-size: large;font-weight: bold;">
+        <div style="width: 180px;height: 111px;text-align: center;vertical-align: middle; border: 2px solid maroon;border-radius:10px;font-size: large;font-weight: bold;">Fun Facts!
+            <div id="jokes" style="width: 160px;padding-left: 12px;height: 75px; text-align: center;display:table-cell;vertical-align: middle;font-size: small; font-weight: normal"></div>
+        </div>
     </div>
-    <div class="modal-content">
+    <div class="modal-header" style="display:inline-block;padding-left: 8px;text-align: center;vertical-align: top;">
+        <div>
+            <a href="https://howdy.tamu.edu/uPortal/normal/render.uP" style="outline: none; text-decoration: underline;" target="_blank"><font color="maroon" size="5" style="font-weight: bold">Howdy Portal</font></a>
+        </div>
+        <br>
+        <div>
+            <button type="button" id="clearSchedule"><font color="black" size="3" style="font-weight: bold">Clear Schedule</font></button>
+        </div>
+        <br>
+        <div>
+            <label for="cars" style="font-weight: bold;font-size: medium">Remove Class:</label>
+            <select id="removeClass" style="width:50px">
+                <option>Select</option>
+            </select>
+        </div>
     </div>
-</body style="background-color:silver"></html>
+    <div style="height: 111px;display:inline-block;padding-left: 8px;text-align: center;vertical-align: top;">
+        <div style="vertical-align: top;padding: 3px;border: 2px solid maroon;border-radius:10px;">
+            <image id="bthoRegLogo" src="anothaone.jpg" width=173 height = 105 style="vertical-align: top;" />
+        </div>
+    </div>
+    <div id="calendar" style="width: 550px"></div>  
+</body>
+</html>
