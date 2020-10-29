@@ -59,10 +59,6 @@ $( function checkForResults() {
                 hours = $( "[data-property='creditHours']" ).slice(0,1).text();
                 status = $( "[data-property='status']" ).slice(i,i+1).find("span").first().text();
                 remainingSpots = (status == "FULL") ? "0" : status;
-                instructorName = $( "[data-property='instructor']" ).slice(i,i+1).find("a").text();
-                names = instructorName.split(" ");
-                firstName = names[0];
-                lastName = names[names.length - 1];
                 moveAttr = attributes.detach();
                 moveTerm = $( "[data-property='termType']" ).slice(i,i+1).detach();
 
@@ -97,25 +93,44 @@ $( function checkForResults() {
 
             // numUpdates prevents from more than one update listener being added to the dist/rmp buttons
             if (numUpdates <= 1) {
-
+                
                 // Display grade distributions when icon is clicked
                 $("tbody").on('click', '#distButton', function () {
-
+                    console.log("clicked");
                     numCharts+=1;
                     numChartsStr = numCharts.toString();
                     console.log("distr clicked");
                     row = $(this).closest('tr');
-                    instructor = $(row).find("[data-property='instructor']").find("a").text();
-                    names = instructor.split(" ");
-                    firstInit = names[0].charAt(0);
-                    lastName = names[names.length - 1];
+                    instructor = $(row).find("[data-property='instructor']").find("a");
+                    names=[];firstInit=[];lastName=[];
+                    for ( e = 0; e < instructor.length; e++ ) {
+                        names[e] = instructor[e].innerText.split(" ");
+                        firstInit[e] = names[e][0].charAt(0);
+                        // this checks how long the last name is and accounts for more than one last name
+                        for(o=0;o<names[e].length;o++) {
+                            if (names[e][o].includes(".") === true) {
+                                midNameIndex = o;
+                            }
+                        }
+                        lastName[e] = names[e][midNameIndex + 1];
+                        for(p=0;p<(names[e].length-2-midNameIndex);p++) {
+                            lastName[e] = lastName[e] + " " + names[e][midNameIndex + p + 2];
+                        }
+                    }
+                    console.log(lastName);
                     thisClass = $(row).find( "[data-property='courseTitle']" ).find("p").first().text().split(" ")[1];
-                    grdData = getDistribution(firstInit,lastName,thisClass);
+                    for ( u=0; u<instructor.length; u++) {
+                        grdData = getDistribution(firstInit[u],lastName[u],thisClass);
+                        if (grdData != undefined){
+                            thisNames = names[u];
+                            break;
+                        }
+                    }
                     // If professor has no grade data in .db, notify user.
                     if ( grdData === undefined ) {
                         console.log("no data!!!");
                         newHTML = '<a style="width: 100%; text-align: center; font-size:150%"></a>';
-                        var noData = $( newHTML ).text( "Sorry! " + names[0] + " " + names[names.length - 1] + " has never taught " + thisClass + " before! D:");
+                        var noData = $( newHTML ).text( "Sorry! This professor has never taught " + thisClass + " before! D:");
                         $( row ).find( "[data-property='gradeDistr']" ).append(noData);
                     }
                     // create distribution chart
@@ -162,7 +177,7 @@ $( function checkForResults() {
                             axisY2:{
                                 interlacedColor: "#ffffff",
                                 gridColor: "#ffffff",
-                                title: names[0] + " " + names[names.length - 1] + " - " + thisClass,
+                                title: thisNames[0] + " " + thisNames[thisNames.length - 1] + " - " + thisClass,
                                 titleFontSize: 13,
                                 titleFontFamily: "Calibri",
                                 titleFontWeight: "bolder",

@@ -28,13 +28,26 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Jokes
     now = new Date();
-    currTime = now.getHours().toString() + ":" + now.getMinutes().toString();
+    if( now.getHours() == 0) {
+        currHour = ["12"," AM"];
+    }
+    else if ( now.getHours() < 12 ) {
+        currHour = [now.getHours().toString()," AM"];
+    }
+    else if ( now.getHours() == 12 ) {
+        currHour = ["12"," PM"];
+    }
+    else {
+        tfgoinon = now.getHours() - 12;
+        currHour = [tfgoinon.toString()," PM"];
+    }
+    currTime = currHour[0] + ":" + now.getMinutes().toString() + currHour[1];
     var randJokes = ["ew.... \n\nyou still use aggiescheduler?", "You Can't Fail Classes You're Not In.", "Pro-Tip: Don't Gig 'em.",
 		"No Real Work Happens In Zachary.", "Sophomore But Freshman By Credit.", "Pain is temporary, GPA is forever.",
 		"You've Yee'd Your Last Haw.", "lol sorry everything is already waitlisted.", "At Least You're Not A Tea Sip.",
 		`It's ` + currTime + ` and t.u. Still Sucks.`, 'TeXAs iS BaCK GuYZ', "'Academically Challenged'", 'Lets make Reveille proud.', 'ts and gs bb.', 'Pass it back Ags.',
         'MEEN aka the Mother of all Engineering', 'hump it', 'Dining Dollars are the new Bitcoin', 'Kellen Mond will lead us to the natty... QB4L <3',
-        'hey baby u wanna go scream at midnight', '74-72', 'laynes > canes', 'horns down'
+        'hey baby u wanna go scream at midnight', '74-72', 'laynes > canes', 'horns down', 'alexa play alewife by clairo', 'listen to moonchild by niki', 'tu ranked??? smells like\nC  A  P'
     ];
     $("#jokes").text(randJokes[Math.floor(Math.random() * randJokes.length)]);
 
@@ -112,64 +125,66 @@ async function addClasses(calendar) {
     console.log(allClasses);
     var sunday = getSunday();    
     eventId = 0;
-    // Looping through storage items
-    for (j=0;j<Object.keys(allClasses).length;j++){
-        thisClass = allClasses["class"+j.toString()];
-        classColor = '#'+Math.floor(Math.random()*16777215).toString(16);
-        // Looping through meeting times
-        for (k=0;k<thisClass.length;k++) {
-            days = thisClass[k].days;
-            for (l=0;l<days.length;l++) {
-                if (days[l]==1){
-                    d = new Date(sunday.getFullYear(),sunday.getMonth(),sunday.getDate());
-                    d.setDate(d.getDate()+l);
-                    classDateStr = d.toISOString().substring(0,d.toISOString().indexOf("T"));
-                    if ((thisClass[k].className != "none") && (thisClass[k].className != undefined)) {
-                        // Adding Calendar Event
-                        eventIdStr = "event" + eventId.toString();
-                        if (thisClass[k].building == "" && thisClass[k].name1 == "") {title = thisClass[k].className + " - " + thisClass[k].section;}
-                        else if (thisClass[k].building == "" && thisClass[k].name1 != "") {title = thisClass[k].className + " - " + thisClass[k].section + "\n" + thisClass[k].name1.substring(0,1) + ". " + thisClass[k].name2;}
-                        else if (thisClass[k].building != "" && thisClass[k].name1 == "") {title = thisClass[k].className + " - " + thisClass[k].section + "\n" + thisClass[k].building + " " + thisClass[k].classroom;}
-                        else {title = thisClass[k].className + " - " + thisClass[k].section + "\n" + thisClass[k].name1.substring(0,1) + ". " + thisClass[k].name2 + "\n" + thisClass[k].building + "-" + thisClass[k].classroom;}
-                        calendar.addEvent({
-                            title: title,
-                            start: classDateStr+"T"+thisClass[k].start,
-                            end: classDateStr+"T"+thisClass[k].end,
-                            backgroundColor: classColor,
-                            borderColor: 'black',
-                            id: eventIdStr
-                        });
-                        eventId += 1;
-                    }    
+    if (allClasses != undefined) {
+        // Looping through storage items
+        for (j=0;j<Object.keys(allClasses).length;j++){
+            thisClass = allClasses["class"+j.toString()];
+            classColor = '#'+Math.floor(Math.random()*16777215).toString(16);
+            // Looping through meeting times
+            for (k=0;k<thisClass.length;k++) {
+                days = thisClass[k].days;
+                for (l=0;l<days.length;l++) {
+                    if (days[l]==1){
+                        d = new Date(sunday.getFullYear(),sunday.getMonth(),sunday.getDate());
+                        d.setDate(d.getDate()+l);
+                        classDateStr = d.toISOString().substring(0,d.toISOString().indexOf("T"));
+                        if ((thisClass[k].className != "none") && (thisClass[k].className != undefined)) {
+                            // Adding Calendar Event
+                            eventIdStr = "event" + eventId.toString();
+                            if (thisClass[k].building == "" && thisClass[k].name1 == "") {title = thisClass[k].className + " - " + thisClass[k].section;}
+                            else if (thisClass[k].building == "" && thisClass[k].name1 != "") {title = thisClass[k].className + " - " + thisClass[k].section + "\n" + thisClass[k].name1.substring(0,1) + ". " + thisClass[k].name2;}
+                            else if (thisClass[k].building != "" && thisClass[k].name1 == "") {title = thisClass[k].className + " - " + thisClass[k].section + "\n" + thisClass[k].building + " " + thisClass[k].classroom;}
+                            else {title = thisClass[k].className + " - " + thisClass[k].section + "\n" + thisClass[k].name1.substring(0,1) + ". " + thisClass[k].name2 + "\n" + thisClass[k].building + "-" + thisClass[k].classroom;}
+                            calendar.addEvent({
+                                title: title,
+                                start: classDateStr+"T"+thisClass[k].start,
+                                end: classDateStr+"T"+thisClass[k].end,
+                                backgroundColor: classColor,
+                                borderColor: 'black',
+                                id: eventIdStr
+                            });
+                            eventId += 1;
+                        }    
+                    }
                 }
             }
-        }
-        // Adding to drop down menu
-        if ((thisClass[0].className != "none") && (thisClass[0].className != undefined)) {
-            var dropDownText = thisClass[0].className + " - " + thisClass[0].section;
-            var addDropDown = $("<option></option>").text(dropDownText);
-            $("#removeClass").append(addDropDown);
+            // Adding to drop down menu
+            if ((thisClass[0].className != "none") && (thisClass[0].className != undefined)) {
+                var dropDownText = thisClass[0].className + " - " + thisClass[0].section;
+                var addDropDown = $("<option></option>").text(dropDownText);
+                $("#removeClass").append(addDropDown);
+            }
         }
     }
-}
 
-function removeAllClasses() {
-    initial = {
-        class0: 
-            [{
-                days: "none",
-                name1 : "none",
-                name2 : "none",
-                className: "none",
-                start: "none",
-                end: "none",
-                building: "none",
-                classroom: "none"
-            }]
-    };
-    chrome.storage.local.set({'myClass': initial}, function() {
-        console.log('all class data removed from storage');
-    });            
+    function removeAllClasses() {
+        initial = {
+            class0: 
+                [{
+                    days: "none",
+                    name1 : "none",
+                    name2 : "none",
+                    className: "none",
+                    start: "none",
+                    end: "none",
+                    building: "none",
+                    classroom: "none"
+                }]
+        };
+        chrome.storage.local.set({'myClass': initial}, function() {
+            console.log('all class data removed from storage');
+        });    
+    }        
 }
 
 function getSunday() {
